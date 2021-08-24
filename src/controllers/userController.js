@@ -38,3 +38,16 @@ module.exports.getUsers = async (req, res) => {
     res.status(error.status).send(error);
   }
 };
+
+module.exports.updateUser = async (req, res) => {
+  try {
+    const { nombre, apellido, email } = req.body;
+    const user = await sequelize.query(
+      `SELECT * FROM "Usuarios" WHERE "Usuarios"."id" = '${req.params.id}'`,
+    );
+    res.status(200).send({ user: user[0] });
+  } catch (error) {
+    console.log(error);
+    res.status(error.status).send(error);
+  }
+};
