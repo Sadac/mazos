@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../database/config');
 const MazosModel = require('./MazosModel');
+const UsuariosMedallas = require('./usuariosMedallasModel');
 
 const Usuarios = sequelize.define('Usuarios', {
   id: {
@@ -32,4 +33,13 @@ MazosModel.belongsTo(Usuarios, {
   sourceKey: 'id',
 });
 
+Usuarios.hasMany(UsuariosMedallas, {
+  foreignKey: 'usuarioId',
+  sourceKey: 'id',
+});
+
+UsuariosMedallas.belongsTo(Usuarios, {
+  foreignKey: 'usuarioId',
+  sourceKey: 'id',
+});
 module.exports = Usuarios;

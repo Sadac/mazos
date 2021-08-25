@@ -17,9 +17,9 @@ const Tarjetas = sequelize.define(
     contenido: {
       type: Sequelize.STRING,
     },
-    // fechaCreacion: {
-    //   type: Sequelize.DATE,
-    // },
+    fechaCreacion: {
+      type: Sequelize.DATE,
+    },
   },
   {
     timestamps: false,

@@ -1,7 +1,6 @@
 const shortid = require('shortid');
 const createError = require('http-errors');
 const sequelize = require('../database/config');
-const Tarjeta = require('../models/tarjetasModels');
 
 module.exports.createTarjeta = async (req, res) => {
   const { titulo, contenido } = req.body;

@@ -30,7 +30,7 @@ const Mazos = sequelize.define(
   },
 );
 
-Mazos.hasMany(MazosModel, {
+Mazos.hasMany(Tarjetas, {
   foreignKey: 'mazoId',
   sourceKey: 'id',
 });
