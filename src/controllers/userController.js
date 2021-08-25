@@ -3,6 +3,7 @@ const createError = require('http-errors');
 const sequelize = require('../database/config');
 const Usuarios = require('../models/userModel');
 const Mazos = require('../models/MazosModel');
+const Medallas = require('../models/medallasModel');
 
 module.exports.createUser = async (req, res) => {
   try {
@@ -11,7 +12,7 @@ module.exports.createUser = async (req, res) => {
       throw createError(400, 'El NOMBRE, APELLIDO e EMAIL son obligatorios');
     }
 
-    // validamos que el email sea uniico
+    // validamos que el email sea unico
     const userExist = await sequelize.query(
       `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`,
     );
@@ -48,6 +49,10 @@ module.exports.getUsers = async (req, res) => {
         model: Mazos,
       }],
     });
+    // const userMedals = await Usuarios.findAll({
+    //   include: [{ model: Medallas }],
+    // });
+
     res.status(200).send(users);
     // const users = await sequelize.query('SELECT * FROM "Usuarios"');
     // res.send({ users: users[0] });
@@ -108,6 +113,51 @@ module.exports.deleteUser = async (req, res) => {
 
     res.status(200).send({ 'Usuario eliminado:': user[0] });
   } catch (error) {
+    res.status(error.status).send(error);
+  }
+};
+
+module.exports.addMedal = async (req, res) => {
+  const { email, nombre } = req.body;
+  try {
+    // Obtenemos el usuario
+    const user = await sequelize.query(
+      `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`,
+    );
+    if (user[1].rowCount === 0) {
+      throw createError(404, 'El usuario no existe');
+    }
+    const usuarioId = user[0][0].id;
+
+    // Obtenemos la medalla
+    const medalla = await sequelize.query(
+      `SELECT * FROM "Medallas" WHERE nombre='${nombre}'`,
+    );
+    if (medalla[1].rowCount === 0) {
+      throw createError(404, 'La medalla no existe, intenta con otro nombre');
+    }
+    const medallaId = medalla[0][0].id;
+
+    const today = new Date();
+    const date = `${today.getFullYear()}-${
+      today.getMonth() + 1
+    }-${today.getDate()}`;
+    
+    const usuarioMedalla = await sequelize.query(`
+    INSERT INTO "UsuarioMedallas" ("usuarioId","medallaId","fechaCreacion") 
+    VALUES 
+    ('${usuarioId}','${medallaId}','${date}')`);
+    if (usuarioMedalla[1] !== 1) {
+      throw createError(500, 'Hubo un error creando al usuario');
+    }
+
+
+    res.send({
+      'Medalla ganada':
+      `El usuario ${user[0][0].nombre} ha ganado la medalla ${medalla[0][0].nombre}`,
+    });
+  } catch (error) {
+    console.log(error);
     res.status(error.status).send(error);
   }
 };
