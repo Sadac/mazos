@@ -3,21 +3,39 @@ const createError = require('http-errors');
 const sequelize = require('../database/config');
 
 module.exports.createMazo = async (req, res) => {
-  const { nombre, descripcion, completado } = req.body;
+  const {
+    nombre, descripcion, completado, email,
+  } = req.body;
   try {
-    if (!nombre && !descripcion && !completado) {
+    if (!nombre || !descripcion || !email) {
       throw createError(
         400,
-        'Debes colocar el NOMBRE, DESCRIPCION y COMPLETADO',
+        'Debes colocar el NOMBRE, DESCRIPCION e EMAIL',
       );
     }
+
+    // validamos que el nombre del mazo no exista
+    const mazoExist = await sequelize.query(
+      `SELECT * FROM "Mazos" WHERE "nombre" = '${nombre}'`,
+    );
+    if (mazoExist[1].rowCount !== 0) {
+      throw createError(400, 'El mazo ya existe, intenta con otro nombre');
+    }
+
+    // Obtenemos el usuario al cual pertenecera el mazo
+    const user = await sequelize.query(
+      `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`,
+    );
+    if (user[1].rowCount === 0) {
+      throw createError(404, 'El usuario no existe');
+    }
+
+    const usuarioId = user[0][0].id;
     const id = shortid.generate();
     const today = new Date();
     const date = `${today.getFullYear()}-${
       today.getMonth() + 1
     }-${today.getDate()}`;
-
-    const usuarioId = 'Cxfc5_Iyl';
 
     const mazo = await sequelize.query(`
     INSERT INTO "Mazos" ("id","usuarioId","nombre","descripcion",
@@ -26,7 +44,7 @@ module.exports.createMazo = async (req, res) => {
     if (mazo[1] !== 1) {
       throw createError(400, 'No se pudo crear el Mazo');
     }
-    res.status(200).send({ msg: 'its work' });
+    res.status(200).send({ msg: `El mazo ${nombre} fue creado exitosamente` });
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);
@@ -74,7 +92,7 @@ module.exports.updateMazos = async (req, res) => {
     const mazoUpdated = await sequelize.query(
       `SELECT * FROM "Mazos" WHERE "id" = '${req.params.id}'`,
     );
-    res.status(200).send(mazoUpdated[0]);
+    res.status(200).send({ 'Mazo modificado': mazoUpdated[0] });
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);

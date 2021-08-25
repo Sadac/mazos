@@ -5,9 +5,18 @@ const sequelize = require('../database/config');
 module.exports.createUser = async (req, res) => {
   try {
     const { nombre, apellido, email } = req.body;
-    if (!nombre) {
-      throw createError(400, 'El nombre es obligatorio');
+    if (!nombre || !apellido || !email) {
+      throw createError(400, 'El NOMBRE, APELLIDO e EMAIL son obligatorios');
     }
+
+    // validamos que el email sea uniico
+    const userExist = await sequelize.query(
+      `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`,
+    );
+    if (userExist[1].rowCount !== 0) {
+      throw createError(404, 'El usuario ya existe, intenta con otro email');
+    }
+
     const id = shortid.generate();
     const today = new Date();
     const date = `${today.getFullYear()}-${
@@ -70,7 +79,7 @@ module.exports.updateUser = async (req, res) => {
     const userUpdated = await sequelize.query(
       `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
     );
-    res.status(200).send(userUpdated[0]);
+    res.status(200).send({ 'Usuario modificado:': userUpdated[0] });
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);

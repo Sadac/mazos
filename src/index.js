@@ -10,7 +10,7 @@ app.use('/api/mazo', require('./routes/mazo'));
 app.use('/api/tarjeta', require('./routes/tarjeta'));
 app.use('/api/medalla', require('./routes/medalla'));
 
-app.use((error, req, res, next) => {
+app.use((error, req, res) => {
   res.status(error.status);
   res.json({
     status: error.status,

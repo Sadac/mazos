@@ -3,18 +3,32 @@ const createError = require('http-errors');
 const sequelize = require('../database/config');
 
 module.exports.createTarjeta = async (req, res) => {
-  const { titulo, contenido } = req.body;
+  const { titulo, contenido, mazo } = req.body;
   try {
-    if (!titulo && !contenido) {
-      throw createError(400, 'El TITULO y el CONTENIDO son obligatorios');
+    if (!titulo || !contenido || !mazo) {
+      throw createError(400, 'El TITULO, CONTENIDO y MAZO son obligatorios');
     }
+    // validamos que el titulo de la tarjeta sea unico
+    const tarjetaExist = await sequelize.query(
+      `SELECT * FROM "Tarjetas" WHERE "titulo" = '${titulo}'`,
+    );
+    if (tarjetaExist[1].rowCount !== 0) {
+      throw createError(404, 'La tarjeta ya existe, intenta con otro titulo');
+    }
+
     const id = shortid.generate();
     const today = new Date();
     const date = `${today.getFullYear()}-${
       today.getMonth() + 1
     }-${today.getDate()}`;
 
-    const mazoId = 'OmDvn78Tb';
+    const mazoObject = await sequelize.query(
+      `SELECT * FROM "Mazos" WHERE "nombre" = '${mazo}'`,
+    );
+    if (mazoObject[1].rowCount === 0) {
+      throw createError(404, 'El mazo no existe');
+    }
+    const mazoId = mazoObject[0][0].id;
 
     const tarjeta = await sequelize.query(
       `INSERT INTO "Tarjetas" ("id","mazoId","titulo","contenido","fechaCreacion")
@@ -71,7 +85,7 @@ module.exports.updateTarjetas = async (req, res) => {
     const tarjetaUpdated = await sequelize.query(
       `SELECT * FROM "Tarjetas" WHERE "id" = '${req.params.id}'`,
     );
-    res.status(200).send(tarjetaUpdated[0]);
+    res.status(200).send({ 'Tarjeta modificada': tarjetaUpdated[0] });
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);
