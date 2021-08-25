@@ -1,12 +1,12 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize({
   database: process.env.DATABASE,
-  username: "euusowygeveqew",
+  username: 'euusowygeveqew',
   password: process.env.PASSWORD,
   host: process.env.HOST,
   port: process.env.DB_PORT,
-  dialect: "postgres",
+  dialect: 'postgres',
   dialectOptions: {
     ssl: {
       require: true,
@@ -17,7 +17,7 @@ const sequelize = new Sequelize({
 sequelize
   .authenticate()
   .then(() => {
-    console.log("Connection has been established successfully.");
+    console.log('Connection has been established successfully.');
   })
   .catch((err) => console.log(err));
 

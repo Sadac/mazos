@@ -1,12 +1,12 @@
-const shortid = require("shortid");
-const createError = require("http-errors");
-const sequelize = require("../database/config");
+const shortid = require('shortid');
+const createError = require('http-errors');
+const sequelize = require('../database/config');
 
 module.exports.createUser = async (req, res) => {
   try {
     const { nombre, apellido, email } = req.body;
     if (!nombre) {
-      throw createError(400, "El nombre es obligatorio");
+      throw createError(400, 'El nombre es obligatorio');
     }
     const id = shortid.generate();
     const today = new Date();
@@ -19,7 +19,7 @@ module.exports.createUser = async (req, res) => {
    VALUES 
    ('${id}','${nombre}','${apellido}','${email}','${date}')`);
     if (user[1] !== 1) {
-      throw createError(500, "Hubo un error creando al usuario");
+      throw createError(500, 'Hubo un error creando al usuario');
     }
     res
       .status(201)
@@ -44,10 +44,10 @@ module.exports.updateUser = async (req, res) => {
   try {
     let { nombre, apellido, email } = req.body;
     if (nombre === undefined && apellido === undefined && email === undefined) {
-      throw new createError(400, "Por favor colocar los datos a actualiar");
+      throw createError(400, 'Por favor colocar los datos a actualiar');
     }
     const user = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`
+      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
     );
     if (!nombre) {
       nombre = user[0][0].nombre;
@@ -61,10 +61,10 @@ module.exports.updateUser = async (req, res) => {
 
     await sequelize.query(
       `UPDATE "Usuarios" SET "nombre"='${nombre}',"apellido"='${apellido}',
-      "email"='${email}' WHERE "id" = '${req.params.id}'`
+      "email"='${email}' WHERE "id" = '${req.params.id}'`,
     );
     const userUpdated = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`
+      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
     );
     res.status(200).send(userUpdated[0]);
   } catch (error) {
@@ -76,16 +76,16 @@ module.exports.updateUser = async (req, res) => {
 module.exports.deleteUser = async (req, res) => {
   try {
     const user = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`
+      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
     );
     if (user[1].rowCount === 0) {
-      throw createError(404, "El usuario no existe");
+      throw createError(404, 'El usuario no existe');
     }
     await sequelize.query(
-      `DELETE FROM "Usuarios" WHERE "id" = '${req.params.id}'`
+      `DELETE FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
     );
 
-    res.status(200).send({ "Usuario eliminado:": user[0] });
+    res.status(200).send({ 'Usuario eliminado:': user[0] });
   } catch (error) {
     res.status(error.status).send(error);
   }

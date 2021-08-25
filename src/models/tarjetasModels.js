@@ -1,8 +1,8 @@
-const Sequelize = require("sequelize");
-const sequelize = require("../database/config");
+const Sequelize = require('sequelize');
+const sequelize = require('../database/config');
 
 const Tarjetas = sequelize.define(
-  "Tarjetas",
+  'Tarjetas',
   {
     id: {
       type: Sequelize.STRING,
@@ -23,7 +23,7 @@ const Tarjetas = sequelize.define(
   },
   {
     timestamps: false,
-  }
+  },
 );
 
 module.exports = Tarjetas;
