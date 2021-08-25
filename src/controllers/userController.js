@@ -1,6 +1,8 @@
 const shortid = require('shortid');
 const createError = require('http-errors');
 const sequelize = require('../database/config');
+const Usuarios = require('../models/userModel');
+const Mazos = require('../models/MazosModel');
 
 module.exports.createUser = async (req, res) => {
   try {
@@ -41,8 +43,14 @@ module.exports.createUser = async (req, res) => {
 
 module.exports.getUsers = async (req, res) => {
   try {
-    const users = await sequelize.query('SELECT * FROM "Usuarios"');
-    res.send({ users: users[0] });
+    const users = await Usuarios.findAll({
+      include: [{
+        model: Mazos,
+      }],
+    });
+    res.status(200).send(users);
+    // const users = await sequelize.query('SELECT * FROM "Usuarios"');
+    // res.send({ users: users[0] });
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);

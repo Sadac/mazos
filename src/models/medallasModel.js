@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../database/config');
-const UsuariosMedallas = require('./usuariosMedallasModel');
+const UsuarioMedallas = require('./usuariosMedallasModel');
 
 const Medallas = sequelize.define('Medallas', {
   id: {
@@ -22,12 +22,12 @@ const Medallas = sequelize.define('Medallas', {
 },
 { timestamps: false });
 
-Medallas.hasMany(UsuariosMedallas, {
+Medallas.hasMany(UsuarioMedallas, {
   foreignKey: 'medallaId',
   sourceKey: 'id',
 });
 
-UsuariosMedallas.belongsTo(Medallas, {
+UsuarioMedallas.belongsTo(Medallas, {
   foreignKey: 'medallaId',
   sourceKey: 'id',
 });

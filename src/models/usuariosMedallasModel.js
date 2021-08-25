@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../database/config');
 
-const UsuariosMedallas = sequelize.define('UsuariosMedallas', {
+const UsuarioMedallas = sequelize.define('UsuarioMedallas', {
   usuarioId: {
     type: Sequelize.STRING,
     primaryKey: true,
@@ -16,4 +16,4 @@ const UsuariosMedallas = sequelize.define('UsuariosMedallas', {
 { timestamps: false });
 
 
-module.exports = UsuariosMedallas;
+module.exports = UsuarioMedallas;

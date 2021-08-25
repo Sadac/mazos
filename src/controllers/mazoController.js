@@ -1,16 +1,19 @@
 const shortid = require('shortid');
 const createError = require('http-errors');
 const sequelize = require('../database/config');
+const Mazos = require('../models/MazosModel');
+const Tarjetas = require('../models/tarjetasModels');
 
 module.exports.createMazo = async (req, res) => {
   const {
-    nombre, descripcion, completado, email,
+    nombre, descripcion, email,
   } = req.body;
+  let { completado } = req.body;
   try {
     if (!nombre || !descripcion || !email) {
       throw createError(
         400,
-        'Debes colocar el NOMBRE, DESCRIPCION e EMAIL',
+        'Debes colocar el NOMBRE, DESCRIPCION e EMAIL del usuario',
       );
     }
 
@@ -27,7 +30,7 @@ module.exports.createMazo = async (req, res) => {
       `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`,
     );
     if (user[1].rowCount === 0) {
-      throw createError(404, 'El usuario no existe');
+      throw createError(404, 'El usuario no existe, intenta con otro email');
     }
 
     const usuarioId = user[0][0].id;
@@ -36,7 +39,9 @@ module.exports.createMazo = async (req, res) => {
     const date = `${today.getFullYear()}-${
       today.getMonth() + 1
     }-${today.getDate()}`;
-
+    if (completado === undefined) {
+      completado = false;
+    }
     const mazo = await sequelize.query(`
     INSERT INTO "Mazos" ("id","usuarioId","nombre","descripcion",
     "completado","fechaCreacion") VALUES
@@ -53,8 +58,10 @@ module.exports.createMazo = async (req, res) => {
 
 module.exports.getMazos = async (req, res) => {
   try {
-    const mazos = await sequelize.query('SELECT * FROM "Mazos"');
-    res.send({ Mazos: mazos[0] });
+    const mazos = await Mazos.findAll({
+      include: [{ model: Tarjetas }],
+    });
+    res.status(200).send(mazos);
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);

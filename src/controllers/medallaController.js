@@ -4,17 +4,31 @@ const sequelize = require('../database/config');
 
 
 module.exports.createMedalla = async (req, res) => {
-  const { nombre, descripcion, puntos } = req.body;
+  const {
+    nombre, descripcion, puntos,
+  } = req.body;
   try {
-    if (!nombre && !descripcion && !puntos) {
-      throw createError(400, 'El NOMBRE, DESCRIPCION y los PUNTOS son obligatorios');
+    if (!nombre || !descripcion || !puntos) {
+      throw createError(400, 'El NOMBRE, DESCRIPCION, y PUNTOS son obligatorios');
     }
+
+    // validamos que no hayan dos medallas con el mismo nombre
+    const medallaExist = await sequelize.query(
+      `SELECT * FROM "Medallas" WHERE "nombre" = '${nombre}'`,
+    );
+    if (medallaExist[1].rowCount !== 0) {
+      throw createError(404, 'La Medalla ya existe, intenta con otro nombre');
+    }
+
+    // obtenemos el ID y la fecha de Creacion
     const id = shortid.generate();
     const today = new Date();
     const date = `${today.getFullYear()}-${
       today.getMonth() + 1
     }-${today.getDate()}`;
 
+
+    // Creamos la medalla
     const medalla = await sequelize.query(
       `INSERT INTO "Medallas" ("id","nombre","descripcion","puntos","fechaCreacion")
       VALUES('${id}','${nombre}','${descripcion}','${puntos}','${date}')`,

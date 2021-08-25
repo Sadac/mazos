@@ -20,6 +20,7 @@ const Mazos = sequelize.define(
     },
     completado: {
       type: Sequelize.BOOLEAN,
+      defaultValue: false,
     },
     fechaCreacion: {
       type: Sequelize.DATE,

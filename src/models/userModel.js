@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../database/config');
-const MazosModel = require('./MazosModel');
-const UsuariosMedallas = require('./usuariosMedallasModel');
+const Mazos = require('./MazosModel');
+const UsuarioMedallas = require('./usuariosMedallasModel');
 
 const Usuarios = sequelize.define('Usuarios', {
   id: {
@@ -23,22 +23,22 @@ const Usuarios = sequelize.define('Usuarios', {
 },
 { timestamps: false });
 
-Usuarios.hasMany(MazosModel, {
+Usuarios.hasMany(Mazos, {
   foreignKey: 'usuarioId',
   sourceKey: 'id',
 });
 
-MazosModel.belongsTo(Usuarios, {
+Mazos.belongsTo(Usuarios, {
   foreignKey: 'usuarioId',
   sourceKey: 'id',
 });
 
-Usuarios.hasMany(UsuariosMedallas, {
+Usuarios.hasMany(UsuarioMedallas, {
   foreignKey: 'usuarioId',
   sourceKey: 'id',
 });
 
-UsuariosMedallas.belongsTo(Usuarios, {
+UsuarioMedallas.belongsTo(Usuarios, {
   foreignKey: 'usuarioId',
   sourceKey: 'id',
 });
