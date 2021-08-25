@@ -82,7 +82,7 @@ module.exports.deleteUser = async (req, res) => {
     if (user[1].rowCount === 0) {
       throw createError(404, "El usuario no existe");
     }
-    const userDeleted = await sequelize.query(
+    await sequelize.query(
       `DELETE FROM "Usuarios" WHERE "id" = '${req.params.id}'`
     );
 
