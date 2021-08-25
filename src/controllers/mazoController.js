@@ -1,11 +1,16 @@
 const sequelize = require("../database/config");
-const Mazo = require("../models/MazosModel");
 const shortid = require("shortid");
 const createError = require("http-errors");
 
 module.exports.createMazo = async (req, res) => {
   let { nombre, descripcion, completado } = req.body;
   try {
+    if (!nombre && !descripcion && !completado) {
+      throw new createError(
+        400,
+        "Debes colocar el NOMBRE, DESCRIPCION y COMPLETADO"
+      );
+    }
     const id = shortid.generate();
     const today = new Date();
     const date = `${today.getFullYear()}-${
@@ -18,7 +23,6 @@ module.exports.createMazo = async (req, res) => {
     INSERT INTO "Mazos" ("id","usuarioId","nombre","descripcion",
     "completado","fechaCreacion") VALUES
      ('${id}','${usuarioId}','${nombre}','${descripcion}','${completado}','${date}')`);
-    console.log(mazo);
     if (mazo[1] !== 1) {
       throw createError(400, "No se pudo crear el Mazo");
     }
@@ -42,11 +46,7 @@ module.exports.getMazos = async (req, res) => {
 module.exports.updateMazos = async (req, res) => {
   try {
     let { nombre, descripcion, completado } = req.body;
-    if (
-      nombre === undefined &&
-      descripcion === undefined &&
-      completado === undefined
-    ) {
+    if (!nombre && !descripcion && !completado) {
       throw new createError(400, "Por favor colocar los datos a actualiar");
     }
 

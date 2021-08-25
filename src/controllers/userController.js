@@ -1,7 +1,6 @@
 const shortid = require("shortid");
 const createError = require("http-errors");
 const sequelize = require("../database/config");
-const Usuarios = require("../models/userModel");
 
 module.exports.createUser = async (req, res) => {
   try {
