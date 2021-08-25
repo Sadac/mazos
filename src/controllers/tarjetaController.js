@@ -46,12 +46,16 @@ module.exports.updateTarjetas = async (req, res) => {
   try {
     let { titulo, contenido } = req.body;
     if (!titulo && !contenido) {
-      throw createError(400, 'Por favor colocar los datos a actualiar');
+      throw createError(400, 'Puedes actualizar titulo y/o contenido');
     }
 
     const tarjeta = await sequelize.query(
       `SELECT * FROM "Tarjetas" WHERE "id" = '${req.params.id}'`,
     );
+    if (tarjeta[1].rowCount === 0) {
+      throw createError(404, 'La tarjeta no existe');
+    }
+
     if (!titulo) {
       titulo = tarjeta[0][0].titulo;
     }

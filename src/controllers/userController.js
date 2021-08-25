@@ -44,11 +44,15 @@ module.exports.updateUser = async (req, res) => {
   try {
     let { nombre, apellido, email } = req.body;
     if (nombre === undefined && apellido === undefined && email === undefined) {
-      throw createError(400, 'Por favor colocar los datos a actualiar');
+      throw createError(400, 'Puedes actualizar nombre, apellido y/o email');
     }
     const user = await sequelize.query(
       `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
     );
+    if (user[1].rowCount === 0) {
+      throw createError(404, 'El usuario no existe');
+    }
+
     if (!nombre) {
       nombre = user[0][0].nombre;
     }

@@ -47,12 +47,15 @@ module.exports.updateMazos = async (req, res) => {
   try {
     let { nombre, descripcion, completado } = req.body;
     if (!nombre && !descripcion && !completado) {
-      throw new createError(400, 'Por favor colocar los datos a actualiar');
+      throw createError(400, 'Puedes actualizar nombre, descripcion y/o completado');
     }
 
     const mazo = await sequelize.query(
       `SELECT * FROM "Mazos" WHERE "id" = '${req.params.id}'`,
     );
+    if (mazo[1].rowCount === 0) {
+      throw createError(404, 'El mazo no existe');
+    }
     if (!nombre) {
       nombre = mazo[0][0].nombre;
     }
