@@ -1,9 +1,9 @@
-const Sequelize = require('sequelize');
-const sequelize = require('../database/config');
-const Tarjetas = require('./tarjetasModels');
+const Sequelize = require("sequelize");
+const sequelize = require("../database/config");
+const Tarjetas = require("./tarjetasModels");
 
 const Mazos = sequelize.define(
-  'Mazos',
+  "Mazos",
   {
     id: {
       type: Sequelize.STRING,
@@ -28,17 +28,17 @@ const Mazos = sequelize.define(
   },
   {
     timestamps: false,
-  },
+  }
 );
 
 Mazos.hasMany(Tarjetas, {
-  foreignKey: 'mazoId',
-  sourceKey: 'id',
+  foreignKey: "mazoId",
+  sourceKey: "id",
 });
 
 Tarjetas.belongsTo(Mazos, {
-  foreignKey: 'mazoId',
-  sourceKey: 'id',
+  foreignKey: "mazoId",
+  sourceKey: "id",
 });
 
 module.exports = Mazos;
