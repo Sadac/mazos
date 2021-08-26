@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 
 const router = express.Router();
 const {
@@ -6,11 +6,11 @@ const {
   getMedallas,
   updateMedallas,
   deleteMedalla,
-} = require("../controllers/medallaController");
+} = require('../controllers/medallaController');
 
-router.post("/", createMedalla);
-router.get("/", getMedallas);
-router.patch("/:id", updateMedallas);
-router.delete("/:id", deleteMedalla);
+router.post('/', createMedalla);
+router.get('/', getMedallas);
+router.patch('/:id', updateMedallas);
+router.delete('/:id', deleteMedalla);
 
 module.exports = router;

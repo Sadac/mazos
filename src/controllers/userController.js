@@ -1,22 +1,21 @@
-const shortid = require("shortid");
-const createError = require("http-errors");
-const sequelize = require("../database/config");
-const Usuarios = require("../models/userModel");
-const Mazos = require("../models/MazosModel");
-const Medallas = require("../models/medallasModel");
-const { find, deleteRegister } = require("./helpers/helper");
+const shortid = require('shortid');
+const createError = require('http-errors');
+const sequelize = require('../database/config');
+const Usuarios = require('../models/userModel');
+const Mazos = require('../models/MazosModel');
+const { find, deleteRegister } = require('./helpers/helper');
 
 module.exports.createUser = async (req, res) => {
   try {
     const { nombre, apellido, email } = req.body;
     if (!nombre || !apellido || !email) {
-      throw createError(400, "El NOMBRE, APELLIDO e EMAIL son obligatorios");
+      throw createError(400, 'El NOMBRE, APELLIDO e EMAIL son obligatorios');
     }
 
     // validamos que el email sea unico
-    const userExist = await find("Usuarios", "email", email);
+    const userExist = await find('Usuarios', 'email', email);
     if (userExist[1].rowCount !== 0) {
-      throw createError(404, "El usuario ya existe, intenta con otro email");
+      throw createError(404, 'El usuario ya existe, intenta con otro email');
     }
 
     const id = shortid.generate();
@@ -30,7 +29,7 @@ module.exports.createUser = async (req, res) => {
    VALUES 
    ('${id}','${nombre}','${apellido}','${email}','${date}')`);
     if (user[1] !== 1) {
-      throw createError(500, "Hubo un error creando al usuario");
+      throw createError(500, 'Hubo un error creando al usuario');
     }
     res
       .status(201)
@@ -51,7 +50,7 @@ module.exports.getUsers = async (req, res) => {
 
 module.exports.getUserDetails = async (req, res) => {
   try {
-    let medallas = [];
+    const medallas = [];
     const user = await Usuarios.findAll({
       where: {
         id: req.params.id,
@@ -63,16 +62,16 @@ module.exports.getUserDetails = async (req, res) => {
       ],
     });
     const usuarioMedallas = await find(
-      "UsuarioMedallas",
-      "usuarioId",
-      req.params.id
+      'UsuarioMedallas',
+      'usuarioId',
+      req.params.id,
     );
 
-    for (let i = 0; i < usuarioMedallas[0].length; i++) {
+    for (let i = 0; i < usuarioMedallas[0].length; i += 1) {
       const medalla = await find(
-        "Medallas",
-        "id",
-        usuarioMedallas[0][i].medallaId
+        'Medallas',
+        'id',
+        usuarioMedallas[0][i].medallaId,
       );
       medallas.push(medalla[0]);
     }
@@ -87,12 +86,12 @@ module.exports.getUserDetails = async (req, res) => {
 module.exports.updateUser = async (req, res) => {
   try {
     let { nombre, apellido, email } = req.body;
-    if (nombre === undefined && apellido === undefined && email === undefined) {
-      throw createError(400, "Puedes actualizar nombre, apellido y/o email");
+    if (!nombre && !apellido && !email) {
+      throw createError(400, 'Puedes actualizar nombre, apellido y/o email');
     }
-    const user = await find("Usuarios", "id", req.params.id);
+    const user = await find('Usuarios', 'id', req.params.id);
     if (user[1].rowCount === 0) {
-      throw createError(404, "El usuario no existe");
+      throw createError(404, 'El usuario no existe');
     }
 
     if (!nombre) {
@@ -104,13 +103,18 @@ module.exports.updateUser = async (req, res) => {
     if (!email) {
       email = user[0][0].email;
     }
+    // validamos que el email a modificar sea unico
+    const emailExist = await find('Usuarios', 'email', email);
+    if (emailExist[1].rowCount !== 0 && emailExist[0][0].email === email) {
+      throw createError(400, `${email} ya existe, intenta con otro.`);
+    }
 
     await sequelize.query(
       `UPDATE "Usuarios" SET "nombre"='${nombre}',"apellido"='${apellido}',
-      "email"='${email}' WHERE "id" = '${req.params.id}'`
+      "email"='${email}' WHERE "id" = '${req.params.id}'`,
     );
-    const userUpdated = await find("Usuarios", "id", req.params.id);
-    res.status(200).send({ "Usuario modificado:": userUpdated[0] });
+    const userUpdated = await find('Usuarios', 'id', req.params.id);
+    res.status(200).send({ 'Usuario modificado:': userUpdated[0] });
   } catch (error) {
     res.status(error.status).send(error);
   }
@@ -118,12 +122,12 @@ module.exports.updateUser = async (req, res) => {
 
 module.exports.deleteUser = async (req, res) => {
   try {
-    const user = await find("Usuarios", "id", req.params.id);
+    const user = await find('Usuarios', 'id', req.params.id);
     if (user[1].rowCount === 0) {
-      throw createError(404, "El usuario no existe");
+      throw createError(404, 'El usuario no existe');
     }
-    await deleteRegister("Usuarios", "id", req.params.id);
-    res.status(200).send({ "Usuario eliminado:": user[0] });
+    await deleteRegister('Usuarios', 'id', req.params.id);
+    res.status(200).send({ 'Usuario eliminado:': user[0] });
   } catch (error) {
     res.status(error.status).send(error);
   }
@@ -132,27 +136,27 @@ module.exports.deleteUser = async (req, res) => {
 module.exports.addMedal = async (req, res) => {
   const { email, nombre } = req.body;
   try {
-    if (!email && !nombre) {
+    if (!email || !nombre) {
       throw createError(
         400,
-        "EMAIL del usuario y NOMBRE de la medalla son obligatorios"
+        'EMAIL del usuario y NOMBRE de la medalla son obligatorios',
       );
     }
     // Obtenemos el usuario
-    const user = await find("Usuarios", "email", email);
+    const user = await find('Usuarios', 'email', email);
     if (user[1].rowCount === 0) {
-      throw createError(404, "El usuario no existe");
+      throw createError(404, 'El usuario no existe');
     }
     const usuarioId = user[0][0].id;
 
     // Obtenemos la medalla
-    const medalla = await find("Medallas", "nombre", nombre);
+    const medalla = await find('Medallas', 'nombre', nombre);
     if (medalla[1].rowCount === 0) {
-      throw createError(404, "La medalla no existe, intenta con otro nombre");
+      throw createError(404, 'La medalla no existe, intenta con otro nombre');
     }
     const medallaId = medalla[0][0].id;
 
-    //Obtenemos la fechaCreacion
+    // Obtenemos la fechaCreacion
     const today = new Date();
     const date = `${today.getFullYear()}-${
       today.getMonth() + 1
@@ -163,11 +167,12 @@ module.exports.addMedal = async (req, res) => {
     VALUES 
     ('${usuarioId}','${medallaId}','${date}')`);
     if (usuarioMedalla[1] !== 1) {
-      throw createError(500, "Hubo un error creando al usuario");
+      throw createError(500, 'Hubo un error creando al usuario');
     }
 
     res.status(200).send({
-      "Medalla ganada": `El usuario ${user[0][0].nombre} ha ganado la medalla ${medalla[0][0].nombre}`,
+      'Medalla ganada': `El usuario ${user[0][0].nombre}
+      ha ganado la medalla ${medalla[0][0].nombre}`,
     });
   } catch (error) {
     res.status(error.status).send(error);
