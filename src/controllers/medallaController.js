@@ -38,7 +38,6 @@ module.exports.createMedalla = async (req, res) => {
       .status(200)
       .send({ msg: `La Medalla ${nombre} se ha creado exitosamente ` });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -48,7 +47,6 @@ module.exports.getMedallas = async (req, res) => {
     const medallas = await sequelize.query('SELECT * FROM "Medallas"');
     res.send({ Medallas: medallas[0] });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -83,7 +81,6 @@ module.exports.updateMedallas = async (req, res) => {
     const medallaUpdated = await find("Medallas", "id", req.params.id);
     res.status(200).send({ "Medalla Actualizada": medallaUpdated[0] });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };

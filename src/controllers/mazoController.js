@@ -46,7 +46,6 @@ module.exports.createMazo = async (req, res) => {
     }
     res.status(200).send({ msg: `El mazo ${nombre} fue creado exitosamente` });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -58,7 +57,6 @@ module.exports.getMazos = async (req, res) => {
     });
     res.status(200).send(mazos);
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -95,7 +93,6 @@ module.exports.updateMazos = async (req, res) => {
     const mazoUpdated = await find("Mazos", "id", req.params.id);
     res.status(200).send({ "Mazo modificado": mazoUpdated[0] });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };

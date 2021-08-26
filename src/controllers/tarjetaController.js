@@ -38,7 +38,6 @@ module.exports.createTarjeta = async (req, res) => {
       .status(200)
       .send({ msg: `La tarjeta ${titulo} se ha creado exitosamente ` });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -48,7 +47,6 @@ module.exports.getTarjetas = async (req, res) => {
     const tarjetas = await sequelize.query('SELECT * FROM "Tarjetas"');
     res.send({ Tarjetas: tarjetas[0] });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -80,7 +78,6 @@ module.exports.updateTarjetas = async (req, res) => {
     const tarjetaUpdated = await find("Tarjetas", "id", req.params.id);
     res.status(200).send({ "Tarjeta modificada": tarjetaUpdated[0] });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };

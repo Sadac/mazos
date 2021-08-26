@@ -36,24 +36,50 @@ module.exports.createUser = async (req, res) => {
       .status(201)
       .send({ msg: `El usuario ${nombre} fue creado exitosamente` });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
 
 module.exports.getUsers = async (req, res) => {
   try {
-    const users = await Usuarios.findAll({
+    const users = await sequelize.query('SELECT * FROM "Usuarios"');
+    res.status(200).send(users[0]);
+  } catch (error) {
+    res.status(error.status).send(error);
+  }
+};
+
+module.exports.getUserDetails = async (req, res) => {
+  try {
+    let medallas = [];
+    const user = await Usuarios.findAll({
+      where: {
+        id: req.params.id,
+      },
       include: [
         {
           model: Mazos,
         },
       ],
     });
+    const usuarioMedallas = await find(
+      "UsuarioMedallas",
+      "usuarioId",
+      req.params.id
+    );
 
-    res.status(200).send(users);
+    for (let i = 0; i < usuarioMedallas[0].length; i++) {
+      const medalla = await find(
+        "Medallas",
+        "id",
+        usuarioMedallas[0][i].medallaId
+      );
+      medallas.push(medalla[0]);
+    }
+    user[0].dataValues.medallas = medallas;
+
+    res.status(200).send(user);
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -86,7 +112,6 @@ module.exports.updateUser = async (req, res) => {
     const userUpdated = await find("Usuarios", "id", req.params.id);
     res.status(200).send({ "Usuario modificado:": userUpdated[0] });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -100,7 +125,6 @@ module.exports.deleteUser = async (req, res) => {
     await deleteRegister("Usuarios", "id", req.params.id);
     res.status(200).send({ "Usuario eliminado:": user[0] });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -108,24 +132,27 @@ module.exports.deleteUser = async (req, res) => {
 module.exports.addMedal = async (req, res) => {
   const { email, nombre } = req.body;
   try {
+    if (!email && !nombre) {
+      throw createError(
+        400,
+        "EMAIL del usuario y NOMBRE de la medalla son obligatorios"
+      );
+    }
     // Obtenemos el usuario
-    const user = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`
-    );
+    const user = await find("Usuarios", "email", email);
     if (user[1].rowCount === 0) {
       throw createError(404, "El usuario no existe");
     }
     const usuarioId = user[0][0].id;
 
     // Obtenemos la medalla
-    const medalla = await sequelize.query(
-      `SELECT * FROM "Medallas" WHERE nombre='${nombre}'`
-    );
+    const medalla = await find("Medallas", "nombre", nombre);
     if (medalla[1].rowCount === 0) {
       throw createError(404, "La medalla no existe, intenta con otro nombre");
     }
     const medallaId = medalla[0][0].id;
 
+    //Obtenemos la fechaCreacion
     const today = new Date();
     const date = `${today.getFullYear()}-${
       today.getMonth() + 1
@@ -139,11 +166,10 @@ module.exports.addMedal = async (req, res) => {
       throw createError(500, "Hubo un error creando al usuario");
     }
 
-    res.send({
+    res.status(200).send({
       "Medalla ganada": `El usuario ${user[0][0].nombre} ha ganado la medalla ${medalla[0][0].nombre}`,
     });
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
