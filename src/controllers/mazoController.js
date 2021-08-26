@@ -52,10 +52,8 @@ module.exports.createMazo = async (req, res) => {
 
 module.exports.getMazos = async (req, res) => {
   try {
-    const mazos = await Mazos.findAll({
-      include: [{ model: Tarjetas }],
-    });
-    res.status(200).send(mazos);
+    const mazos = await sequelize.query('SELECT * FROM "Mazos"');
+    res.status(200).send(mazos[0]);
   } catch (error) {
     res.status(error.status).send(error);
   }
