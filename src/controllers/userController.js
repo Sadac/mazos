@@ -1,23 +1,22 @@
-const shortid = require('shortid');
-const createError = require('http-errors');
-const sequelize = require('../database/config');
-const Usuarios = require('../models/userModel');
-const Mazos = require('../models/MazosModel');
-const Medallas = require('../models/medallasModel');
+const shortid = require("shortid");
+const createError = require("http-errors");
+const sequelize = require("../database/config");
+const Usuarios = require("../models/userModel");
+const Mazos = require("../models/MazosModel");
+const Medallas = require("../models/medallasModel");
+const { find, deleteRegister } = require("./helpers/helper");
 
 module.exports.createUser = async (req, res) => {
   try {
     const { nombre, apellido, email } = req.body;
     if (!nombre || !apellido || !email) {
-      throw createError(400, 'El NOMBRE, APELLIDO e EMAIL son obligatorios');
+      throw createError(400, "El NOMBRE, APELLIDO e EMAIL son obligatorios");
     }
 
     // validamos que el email sea unico
-    const userExist = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`,
-    );
+    const userExist = await find("Usuarios", "email", email);
     if (userExist[1].rowCount !== 0) {
-      throw createError(404, 'El usuario ya existe, intenta con otro email');
+      throw createError(404, "El usuario ya existe, intenta con otro email");
     }
 
     const id = shortid.generate();
@@ -31,7 +30,7 @@ module.exports.createUser = async (req, res) => {
    VALUES 
    ('${id}','${nombre}','${apellido}','${email}','${date}')`);
     if (user[1] !== 1) {
-      throw createError(500, 'Hubo un error creando al usuario');
+      throw createError(500, "Hubo un error creando al usuario");
     }
     res
       .status(201)
@@ -45,17 +44,14 @@ module.exports.createUser = async (req, res) => {
 module.exports.getUsers = async (req, res) => {
   try {
     const users = await Usuarios.findAll({
-      include: [{
-        model: Mazos,
-      }],
+      include: [
+        {
+          model: Mazos,
+        },
+      ],
     });
-    // const userMedals = await Usuarios.findAll({
-    //   include: [{ model: Medallas }],
-    // });
 
     res.status(200).send(users);
-    // const users = await sequelize.query('SELECT * FROM "Usuarios"');
-    // res.send({ users: users[0] });
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);
@@ -66,13 +62,11 @@ module.exports.updateUser = async (req, res) => {
   try {
     let { nombre, apellido, email } = req.body;
     if (nombre === undefined && apellido === undefined && email === undefined) {
-      throw createError(400, 'Puedes actualizar nombre, apellido y/o email');
+      throw createError(400, "Puedes actualizar nombre, apellido y/o email");
     }
-    const user = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
-    );
+    const user = await find("Usuarios", "id", req.params.id);
     if (user[1].rowCount === 0) {
-      throw createError(404, 'El usuario no existe');
+      throw createError(404, "El usuario no existe");
     }
 
     if (!nombre) {
@@ -87,12 +81,10 @@ module.exports.updateUser = async (req, res) => {
 
     await sequelize.query(
       `UPDATE "Usuarios" SET "nombre"='${nombre}',"apellido"='${apellido}',
-      "email"='${email}' WHERE "id" = '${req.params.id}'`,
+      "email"='${email}' WHERE "id" = '${req.params.id}'`
     );
-    const userUpdated = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
-    );
-    res.status(200).send({ 'Usuario modificado:': userUpdated[0] });
+    const userUpdated = await find("Usuarios", "id", req.params.id);
+    res.status(200).send({ "Usuario modificado:": userUpdated[0] });
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);
@@ -101,18 +93,14 @@ module.exports.updateUser = async (req, res) => {
 
 module.exports.deleteUser = async (req, res) => {
   try {
-    const user = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
-    );
+    const user = await find("Usuarios", "id", req.params.id);
     if (user[1].rowCount === 0) {
-      throw createError(404, 'El usuario no existe');
+      throw createError(404, "El usuario no existe");
     }
-    await sequelize.query(
-      `DELETE FROM "Usuarios" WHERE "id" = '${req.params.id}'`,
-    );
-
-    res.status(200).send({ 'Usuario eliminado:': user[0] });
+    await deleteRegister("Usuarios", "id", req.params.id);
+    res.status(200).send({ "Usuario eliminado:": user[0] });
   } catch (error) {
+    console.log(error);
     res.status(error.status).send(error);
   }
 };
@@ -122,19 +110,19 @@ module.exports.addMedal = async (req, res) => {
   try {
     // Obtenemos el usuario
     const user = await sequelize.query(
-      `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`,
+      `SELECT * FROM "Usuarios" WHERE "email" = '${email}'`
     );
     if (user[1].rowCount === 0) {
-      throw createError(404, 'El usuario no existe');
+      throw createError(404, "El usuario no existe");
     }
     const usuarioId = user[0][0].id;
 
     // Obtenemos la medalla
     const medalla = await sequelize.query(
-      `SELECT * FROM "Medallas" WHERE nombre='${nombre}'`,
+      `SELECT * FROM "Medallas" WHERE nombre='${nombre}'`
     );
     if (medalla[1].rowCount === 0) {
-      throw createError(404, 'La medalla no existe, intenta con otro nombre');
+      throw createError(404, "La medalla no existe, intenta con otro nombre");
     }
     const medallaId = medalla[0][0].id;
 
@@ -142,19 +130,17 @@ module.exports.addMedal = async (req, res) => {
     const date = `${today.getFullYear()}-${
       today.getMonth() + 1
     }-${today.getDate()}`;
-    
+
     const usuarioMedalla = await sequelize.query(`
     INSERT INTO "UsuarioMedallas" ("usuarioId","medallaId","fechaCreacion") 
     VALUES 
     ('${usuarioId}','${medallaId}','${date}')`);
     if (usuarioMedalla[1] !== 1) {
-      throw createError(500, 'Hubo un error creando al usuario');
+      throw createError(500, "Hubo un error creando al usuario");
     }
 
-
     res.send({
-      'Medalla ganada':
-      `El usuario ${user[0][0].nombre} ha ganado la medalla ${medalla[0][0].nombre}`,
+      "Medalla ganada": `El usuario ${user[0][0].nombre} ha ganado la medalla ${medalla[0][0].nombre}`,
     });
   } catch (error) {
     console.log(error);
