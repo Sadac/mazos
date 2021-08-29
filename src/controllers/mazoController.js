@@ -72,7 +72,7 @@ module.exports.getMazos = async (req, res) => {
         usuario: mazo.Usuario.nombre,
       };
     });
-    res.sattus(200).send(response);
+    res.status(200).send(response);
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);
