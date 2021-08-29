@@ -69,7 +69,6 @@ module.exports.getTarjetas = async (req, res) => {
     });
     res.status(200).send(response);
   } catch (error) {
-    console.log(error);
     res.status(error.status).send(error);
   }
 };
