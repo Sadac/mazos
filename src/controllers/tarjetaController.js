@@ -67,9 +67,7 @@ module.exports.getTarjetas = async (req, res) => {
         Mazo: tarjeta.Mazo.nombre,
       };
     });
-    res.send(response);
-    // const tarjetas = await sequelize.query('SELECT * FROM "Tarjetas"');
-    // res.send(tarjetas[0]);
+    res.status(200).send(response);
   } catch (error) {
     console.log(error);
     res.status(error.status).send(error);
