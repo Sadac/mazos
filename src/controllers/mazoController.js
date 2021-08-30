@@ -3,6 +3,7 @@ const createError = require('http-errors');
 const sequelize = require('../database/config');
 const Mazos = require('../models/MazosModel');
 const Tarjetas = require('../models/tarjetasModels');
+const Usuarios = require('../models/userModel');
 const { find, deleteRegister } = require('./helpers/helper');
 
 module.exports.createMazo = async (req, res) => {
@@ -52,8 +53,24 @@ module.exports.createMazo = async (req, res) => {
 
 module.exports.getMazos = async (req, res) => {
   try {
-    const mazos = await sequelize.query('SELECT * FROM "Mazos"');
-    res.status(200).send(mazos[0]);
+    const mazos = await Mazos.findAll({
+      include: [
+        {
+          model: Usuarios,
+          attributes: ['nombre'],
+        },
+      ],
+    });
+    const response = mazos.map((mazo) => ({
+      id: mazo.id,
+      usuarioId: mazo.usuarioId,
+      nombre: mazo.nombre,
+      descripcion: mazo.descripcion,
+      completado: mazo.completado,
+      fechaCreacion: mazo.fechaCreacion,
+      usuario: mazo.Usuario.nombre,
+    }));
+    res.status(200).send(response);
   } catch (error) {
     res.status(error.status).send(error);
   }

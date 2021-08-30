@@ -7,6 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
+app.use(cors());
 app.use('/api/usuario', require('./routes/user'));
 app.use('/api/mazo', require('./routes/mazo'));
 app.use('/api/tarjeta', require('./routes/tarjeta'));

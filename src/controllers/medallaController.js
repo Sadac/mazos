@@ -45,7 +45,7 @@ module.exports.createMedalla = async (req, res) => {
 module.exports.getMedallas = async (req, res) => {
   try {
     const medallas = await sequelize.query('SELECT * FROM "Medallas"');
-    res.send({ Medallas: medallas[0] });
+    res.send(medallas[0]);
   } catch (error) {
     res.status(error.status).send(error);
   }
@@ -55,7 +55,10 @@ module.exports.updateMedallas = async (req, res) => {
   try {
     let { nombre, descripcion, puntos } = req.body;
     if (!nombre && !descripcion && !puntos) {
-      throw createError(400, 'Por favor colocar NOMBRE, DESCRIPCION y/o PUNTOS');
+      throw createError(
+        400,
+        'Por favor colocar NOMBRE, DESCRIPCION y/o PUNTOS',
+      );
     }
 
     const medalla = await find('Medallas', 'id', req.params.id);

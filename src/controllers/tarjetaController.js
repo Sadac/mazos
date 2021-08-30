@@ -2,12 +2,17 @@ const shortid = require('shortid');
 const createError = require('http-errors');
 const sequelize = require('../database/config');
 const { find, deleteRegister } = require('./helpers/helper');
+const Tarjetas = require('../models/tarjetasModels');
+const Mazos = require('../models/MazosModel');
 
 module.exports.createTarjeta = async (req, res) => {
   const { titulo, contenido, mazo } = req.body;
   try {
     if (!titulo || !contenido || !mazo) {
-      throw createError(400, 'El TITULO, CONTENIDO y MAZO (nombre) son obligatorios');
+      throw createError(
+        400,
+        'El TITULO, CONTENIDO y MAZO (nombre) son obligatorios',
+      );
     }
     // validamos que el titulo de la tarjeta sea unico
     const tarjetaExist = await find('Tarjetas', 'titulo', titulo);
@@ -44,8 +49,23 @@ module.exports.createTarjeta = async (req, res) => {
 
 module.exports.getTarjetas = async (req, res) => {
   try {
-    const tarjetas = await sequelize.query('SELECT * FROM "Tarjetas"');
-    res.send({ Tarjetas: tarjetas[0] });
+    const tarjetas = await Tarjetas.findAll({
+      include: [
+        {
+          model: Mazos,
+          attributes: ['nombre'],
+        },
+      ],
+    });
+    const response = tarjetas.map((tarjeta) => ({
+      id: tarjeta.id,
+      mazoId: tarjeta.mazoId,
+      titulo: tarjeta.titulo,
+      contenido: tarjeta.contenido,
+      fechaCreacion: tarjeta.fechaCreacion,
+      Mazo: tarjeta.Mazo.nombre,
+    }));
+    res.status(200).send(response);
   } catch (error) {
     res.status(error.status).send(error);
   }

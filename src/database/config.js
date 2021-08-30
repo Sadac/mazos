@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize({
   database: process.env.DATABASE,
-  username: process.env.USERNAME,
+  username: 'euusowygeveqew',
   password: process.env.PASSWORD,
   host: process.env.HOST,
   port: process.env.DB_PORT,
