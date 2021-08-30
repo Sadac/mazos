@@ -68,6 +68,7 @@ module.exports.getUserDetails = async (req, res) => {
     );
 
     for (let i = 0; i < usuarioMedallas[0].length; i += 1) {
+      // eslint-disable-next-line
       const medalla = await find(
         'Medallas',
         'id',
@@ -103,15 +104,10 @@ module.exports.updateUser = async (req, res) => {
     if (!email) {
       email = user[0][0].email;
     }
-    // validamos que el email a modificar sea unico
-    const emailExist = await find('Usuarios', 'email', email);
-    if (emailExist[1].rowCount !== 0 && emailExist[0][0].email === email) {
-      throw createError(400, `${email} ya existe, intenta con otro.`);
-    }
 
     await sequelize.query(
-      `UPDATE "Usuarios" SET "nombre"='${nombre}',"apellido"='${apellido}',
-      "email"='${email}' WHERE "id" = '${req.params.id}'`,
+      `UPDATE "Usuarios" SET "nombre"='${nombre}',"apellido"='${apellido}' 
+      WHERE "id" = '${req.params.id}'`,
     );
     const userUpdated = await find('Usuarios', 'id', req.params.id);
     res.status(200).send({ 'Usuario modificado:': userUpdated[0] });
