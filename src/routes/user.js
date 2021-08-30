@@ -6,6 +6,7 @@ const {
   deleteUser,
   addMedal,
   getUserDetails,
+  deleteMedal,
 } = require('../controllers/userController');
 
 const router = express.Router();
@@ -13,7 +14,8 @@ router.post('/', createUser);
 router.get('/', getUsers);
 router.get('/:id', getUserDetails);
 router.patch('/:id', updateUser);
-router.delete('/:id', deleteUser);
+router.delete('/delete/:id', deleteUser);
 router.post('/add', addMedal);
+router.delete('/delete', deleteMedal);
 
 module.exports = router;

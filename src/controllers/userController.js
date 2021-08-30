@@ -152,6 +152,14 @@ module.exports.addMedal = async (req, res) => {
     }
     const medallaId = medalla[0][0].id;
 
+    // validamos si el usuario ya tiene la medalla
+    const medallaGanada = await sequelize.query(
+      `SELECT * FROM "UsuarioMedallas" WHERE
+      "usuarioId" = '${usuarioId}' and "medallaId" = '${medallaId}'`,
+    );
+    if (medallaGanada[1].rowCount > 0) {
+      throw createError(400, 'El usuario ya tiene ganada esta medalla.');
+    }
     // Obtenemos la fechaCreacion
     const today = new Date();
     const date = `${today.getFullYear()}-${
@@ -170,6 +178,36 @@ module.exports.addMedal = async (req, res) => {
       'Medalla ganada': `El usuario ${user[0][0].nombre}
       ha ganado la medalla ${medalla[0][0].nombre}`,
     });
+  } catch (error) {
+    res.status(error.status).send(error);
+  }
+};
+
+module.exports.deleteMedal = async (req, res) => {
+  const { usuarioId, medallaId } = req.body;
+
+  try {
+    if (!usuarioId || !medallaId) {
+      throw createError(400, 'USUARIOID y MEDALLAID son obligatorios');
+    }
+    // validamos que el usuario tenga la medalla ganada
+    const medallaGanada = await sequelize.query(
+      `SELECT * FROM "UsuarioMedallas" WHERE
+      "usuarioId" = '${usuarioId}' and "medallaId" = '${medallaId}'`,
+    );
+    if (medallaGanada[1].rowCount === 0) {
+      throw createError(
+        400,
+        'No se puede eliminar porque el usuario no tiene la medalla ganada.',
+      );
+    }
+
+    await sequelize.query(`
+    DELETE FROM "UsuarioMedallas"
+    WHERE "usuarioId" = '${usuarioId}' and "medallaId" = '${medallaId}'
+    `);
+
+    res.status(200).send({ message: 'El usuario a perdido la medalla exitosamente.' });
   } catch (error) {
     res.status(error.status).send(error);
   }
